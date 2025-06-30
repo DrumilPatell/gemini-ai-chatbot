@@ -1,0 +1,37 @@
+# Gemini AI Chatbot 💬
+
+Created By Drumil Patel🔥
+
+A modern, aesthetic chatbot built with React, Tailwind CSS, and Google's Gemini API.
+
+## 🔥 Features
+
+- ✨ Gemini 2.0 Flash API integration
+- 🌙 Toggle between light and dark mode
+- 🧠 Smart markdown-rendered AI replies
+- 🎨 Animated chat bubbles using Framer Motion
+- ⚡ Responsive, mobile-friendly layout
+- 🧵 Modern UI with Inter font & TailwindCSS v4
+- 📦 Clean component structure for easy expansion
+
+## 🚀 Tech Stack
+
+- React.js
+- Tailwind CSS v4
+- Vite
+- Framer Motion
+- React Markdown
+- Gemini API (Google AI)
+
+
+## 📷 Preview
+
+![Chat UI Screenshot](./screenshot.png)
+
+## 🛠️ Setup Instructions
+
+```bash
+git clone https://github.com/yourusername/gemini-ai-chatbot.git
+cd gemini-ai-chatbot
+npm install
+npm run dev
