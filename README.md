@@ -23,10 +23,23 @@ A modern, aesthetic chatbot built with React, Tailwind CSS, and Google's Gemini 
 - React Markdown
 - Gemini API (Google AI)
 
+## 🌐 Live Demo
+
+> 🟢 Deployed on Vercel  
+> 👉 [Click here to try the chatbot](https://gemini-ai-chatbot-coral-nu.vercel.app/)
+
 
 ## 📷 Preview
 
 ![Chat UI Screenshot](./screenshot.png)
+
+## 📁 Environment Variables
+
+Create a `.env` file in the root directory with the following:
+
+```env
+VITE_API_GENERATIVE_LANGUAGE_CLIENT=your_openai_or_gemini_api_key
+Replace your_openai_or_gemini_api_key with your actual API key from Google AI Studio.
 
 ## 🛠️ Setup Instructions
 
