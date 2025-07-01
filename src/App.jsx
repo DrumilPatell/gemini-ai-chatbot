@@ -4,13 +4,14 @@ import ReactMarkdown from "react-markdown";
 import { motion } from "framer-motion";
 import { ArrowUp } from "lucide-react";
 import TextareaAutosize from "react-textarea-autosize";
-
+import { saveMessage, loadChatHistory, deleteAllMessages } from "./firebase/chatService";
 
 function App() {
   const [chatHistory, setChatHistory] = useState([]);
   const [question, setQuestion] = useState("");
   const [generatingAnswer, setGeneratingAnswer] = useState(false);
   const [darkMode, setDarkMode] = useState(true);
+  const [loadingHistory, setLoadingHistory] = useState(false);
   const chatContainerRef = useRef(null);
 
   useEffect(() => {
@@ -30,6 +31,13 @@ function App() {
     });
   };
 
+  const fetchChatHistory = async () => {
+    setLoadingHistory(true);
+    const history = await loadChatHistory();
+    setChatHistory(history);
+    setLoadingHistory(false);
+  };
+
   const generateAnswer = async (e) => {
     e.preventDefault();
     if (!question.trim()) return;
@@ -44,6 +52,7 @@ function App() {
     setChatHistory(updatedHistory);
     setQuestion("");
     setGeneratingAnswer(true);
+    await saveMessage(newQuestion);
 
     const contextMessages = updatedHistory.map((item) => ({
       role: item.type === "question" ? "user" : "model",
@@ -65,43 +74,69 @@ function App() {
       };
 
       setChatHistory((prev) => [...prev, aiReply]);
+      await saveMessage(aiReply);
     } catch (error) {
-      setChatHistory((prev) => [
-        ...prev,
-        {
-          type: "answer",
-          content: "❌ Error generating response.",
-          timestamp: getCurrentTimestamp(),
-        },
-      ]);
+      const errReply = {
+        type: "answer",
+        content: "❌ Error generating response.",
+        timestamp: getCurrentTimestamp(),
+      };
+      setChatHistory((prev) => [...prev, errReply]);
+      await saveMessage(errReply);
     } finally {
       setGeneratingAnswer(false);
     }
   };
 
+  const clearChat = () => {
+    const confirmClear = window.confirm("Are you sure you want to clear chat view?");
+    if (!confirmClear) return;
+    setChatHistory([]); // Only clears local UI, keeps history in Firestore
+  };
+  ;
+
   return (
     <div className="min-h-screen font-inter bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-200 dark:from-gray-900 dark:to-gray-800 transition-all duration-500">
       <div className="max-w-3xl mx-auto px-4 py-6 flex flex-col h-screen">
-        {/* Header */}
         <div className="flex justify-between items-center mb-4">
           <div className="flex-1 text-center">
-            <h1 className="text-4xl font-bold text-blue-700 dark:text-blue-300"> AI ChatBot💬</h1>
+            <h1 className="text-4xl font-bold text-blue-700 dark:text-blue-300">
+              AI ChatBot💬
+            </h1>
           </div>
-          <button
-            onClick={() => setDarkMode(!darkMode)}
-            className="flex items-center gap-2 px-3 py-1 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded-full shadow-sm border border-gray-300 dark:border-gray-600 hover:scale-105 transition"
-          >
-            <span className="text-lg">{darkMode ? "🌙" : "☀️"}</span>
-            <div
-              className={`w-10 h-5 flex items-center bg-gray-300 dark:bg-gray-600 rounded-full px-1 transition-all duration-300 ${darkMode ? "justify-end" : "justify-start"
-                }`}
+          <div className="flex gap-2 items-center">
+            <button
+              onClick={clearChat}
+              className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded-full text-sm shadow-md transition"
             >
-              <div className="bg-white w-3.5 h-3.5 rounded-full shadow-md"></div>
-            </div>
-          </button>
+              🗑️ Clear Chat
+            </button>
+            <button
+              onClick={fetchChatHistory}
+              className="px-3 py-1 bg-green-500 hover:bg-green-600 text-white rounded-full text-sm shadow-md transition"
+            >
+              🔄 Load History
+            </button>
+            <button
+              onClick={() => setDarkMode(!darkMode)}
+              className="flex items-center gap-2 px-3 py-1 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded-full shadow-sm border border-gray-300 dark:border-gray-600 hover:scale-105 transition"
+            >
+              <span className="text-lg">{darkMode ? "🌙" : "☀️"}</span>
+              <div
+                className={`w-10 h-5 flex items-center bg-gray-300 dark:bg-gray-600 rounded-full px-1 transition-all duration-300 ${darkMode ? "justify-end" : "justify-start"}`}
+              >
+                <div className="bg-white w-3.5 h-3.5 rounded-full shadow-md"></div>
+              </div>
+            </button>
+          </div>
         </div>
 
-        {/* Chat area */}
+        {loadingHistory && (
+          <div className="text-center text-sm text-gray-500 dark:text-gray-300">
+            🔄 Loading chat history...
+          </div>
+        )}
+
         <div
           ref={chatContainerRef}
           className="flex-1 overflow-y-auto bg-white/60 dark:bg-white/10 backdrop-blur-lg rounded-2xl p-6 space-y-4 shadow-xl"
@@ -117,8 +152,7 @@ function App() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, ease: "easeOut" }}
-                className={`flex ${chat.type === "question" ? "justify-end" : "justify-start"
-                  }`}
+                className={`flex ${chat.type === "question" ? "justify-end" : "justify-start"}`}
               >
                 <div
                   className={`max-w-xs md:max-w-sm px-4 py-3 rounded-xl text-sm shadow-md whitespace-pre-wrap break-words relative ${chat.type === "question"
@@ -135,7 +169,6 @@ function App() {
             ))
           )}
 
-          {/* Typing animation */}
           {generatingAnswer && (
             <div className="flex justify-start">
               <div className="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 px-4 py-2 rounded-xl flex gap-1 items-center">
@@ -147,7 +180,6 @@ function App() {
           )}
         </div>
 
-        {/* Input box */}
         <form onSubmit={generateAnswer} className="relative mt-4">
           <TextareaAutosize
             value={question}
@@ -158,18 +190,17 @@ function App() {
             className="w-full pr-12 rounded-xl border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-white focus:ring-2 focus:ring-blue-400 focus:outline-none px-4 py-3 resize-none text-sm shadow-md transition-all duration-200"
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();         // prevent newline
-                generateAnswer(e);          // trigger send
+                e.preventDefault();
+                generateAnswer(e);
               }
             }}
           />
-
           <button
             type="submit"
             disabled={generatingAnswer}
             className={`absolute bottom-2.5 right-3 p-2 rounded-full transition ${generatingAnswer
-                ? "bg-blue-400 cursor-not-allowed"
-                : "bg-blue-500 hover:bg-blue-600"
+              ? "bg-blue-400 cursor-not-allowed"
+              : "bg-blue-500 hover:bg-blue-600"
               }`}
           >
             <ArrowUp className="w-3.5 h-3.5 text-white" />

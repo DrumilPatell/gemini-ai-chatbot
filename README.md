@@ -13,6 +13,7 @@ A modern, aesthetic chatbot built with React, Tailwind CSS, and Google's Gemini 
 - ⚡ Responsive, mobile-friendly layout
 - 🧵 Modern UI with Inter font & TailwindCSS v4
 - 📦 Clean component structure for easy expansion
+- 🗂️ Chat history saved in Firebase Firestore
 
 ## 🚀 Tech Stack
 
@@ -22,6 +23,8 @@ A modern, aesthetic chatbot built with React, Tailwind CSS, and Google's Gemini 
 - Framer Motion
 - React Markdown
 - Gemini API (Google AI)
+- Database: Firebase Firestore (frontend-only, no backend)
+
 
 ## 🌐 Live Demo
 
