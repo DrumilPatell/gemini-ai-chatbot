@@ -85,7 +85,7 @@ function App() {
         {/* Header */}
         <div className="flex justify-between items-center mb-4">
           <div className="flex-1 text-center">
-            <h1 className="text-4xl font-bold text-blue-700 dark:text-blue-300">💬 AI ChatBot</h1>
+            <h1 className="text-4xl font-bold text-blue-700 dark:text-blue-300"> AI ChatBot💬</h1>
           </div>
           <button
             onClick={() => setDarkMode(!darkMode)}
