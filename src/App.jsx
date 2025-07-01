@@ -2,12 +2,15 @@ import { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import ReactMarkdown from "react-markdown";
 import { motion } from "framer-motion";
+import { ArrowUp } from "lucide-react";
+import TextareaAutosize from "react-textarea-autosize";
+
 
 function App() {
   const [chatHistory, setChatHistory] = useState([]);
   const [question, setQuestion] = useState("");
   const [generatingAnswer, setGeneratingAnswer] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(true);
   const chatContainerRef = useRef(null);
 
   useEffect(() => {
@@ -90,9 +93,8 @@ function App() {
           >
             <span className="text-lg">{darkMode ? "🌙" : "☀️"}</span>
             <div
-              className={`w-10 h-5 flex items-center bg-gray-300 dark:bg-gray-600 rounded-full px-1 transition-all duration-300 ${
-                darkMode ? "justify-end" : "justify-start"
-              }`}
+              className={`w-10 h-5 flex items-center bg-gray-300 dark:bg-gray-600 rounded-full px-1 transition-all duration-300 ${darkMode ? "justify-end" : "justify-start"
+                }`}
             >
               <div className="bg-white w-3.5 h-3.5 rounded-full shadow-md"></div>
             </div>
@@ -115,16 +117,14 @@ function App() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, ease: "easeOut" }}
-                className={`flex ${
-                  chat.type === "question" ? "justify-end" : "justify-start"
-                }`}
+                className={`flex ${chat.type === "question" ? "justify-end" : "justify-start"
+                  }`}
               >
                 <div
-                  className={`max-w-xs md:max-w-sm px-4 py-3 rounded-xl text-sm shadow-md whitespace-pre-wrap break-words relative ${
-                    chat.type === "question"
-                      ? "bg-blue-600 text-white rounded-br-none"
-                      : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-100 rounded-bl-none"
-                  }`}
+                  className={`max-w-xs md:max-w-sm px-4 py-3 rounded-xl text-sm shadow-md whitespace-pre-wrap break-words relative ${chat.type === "question"
+                    ? "bg-blue-600 text-white rounded-br-none"
+                    : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-100 rounded-bl-none"
+                    }`}
                 >
                   <ReactMarkdown>{chat.content}</ReactMarkdown>
                   <div className="text-[10px] text-right text-gray-400 dark:text-gray-300 mt-1">
@@ -149,29 +149,30 @@ function App() {
 
         {/* Input box */}
         <form onSubmit={generateAnswer} className="relative mt-4">
-          <textarea
+          <TextareaAutosize
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
-            rows="2"
+            minRows={1}
+            maxRows={6}
             placeholder="Type your message..."
-            className="w-full pr-16 rounded-xl border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-white focus:ring-2 focus:ring-blue-400 focus:outline-none p-4 resize-none text-sm shadow-md"
+            className="w-full pr-12 rounded-xl border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-white focus:ring-2 focus:ring-blue-400 focus:outline-none px-4 py-3 resize-none text-sm shadow-md transition-all duration-200"
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                generateAnswer(e);
+                e.preventDefault();         // prevent newline
+                generateAnswer(e);          // trigger send
               }
             }}
           />
+
           <button
             type="submit"
             disabled={generatingAnswer}
-            className={`absolute bottom-3 right-4 px-4 py-2 text-sm rounded-full text-white transition-all ${
-              generatingAnswer
+            className={`absolute bottom-2.5 right-3 p-2 rounded-full transition ${generatingAnswer
                 ? "bg-blue-400 cursor-not-allowed"
                 : "bg-blue-500 hover:bg-blue-600"
-            }`}
+              }`}
           >
-            Send
+            <ArrowUp className="w-3.5 h-3.5 text-white" />
           </button>
         </form>
       </div>
