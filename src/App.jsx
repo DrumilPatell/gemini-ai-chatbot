@@ -54,10 +54,17 @@ function App() {
     setGeneratingAnswer(true);
     await saveMessage(newQuestion);
 
-    const contextMessages = updatedHistory.map((item) => ({
-      role: item.type === "question" ? "user" : "model",
-      parts: [{ text: item.content }],
-    }));
+    const contextMessages = [
+      {
+        role: "user",
+        parts: [{ text: "You are a helpful assistant. Always give short and concise responses unless asked for detailed explanation." }]
+      },
+      ...updatedHistory.map((item) => ({
+        role: item.type === "question" ? "user" : "model",
+        parts: [{ text: item.content }],
+      }))
+    ];
+
 
     try {
       const response = await axios.post(
@@ -65,8 +72,7 @@ function App() {
         { contents: contextMessages }
       );
 
-      const aiText =
-        response.data?.candidates?.[0]?.content?.parts?.[0]?.text || "No response.";
+      const aiText = response.data?.candidates?.[0]?.content?.parts?.[0]?.text || "No response.";
       const aiReply = {
         type: "answer",
         content: aiText,
@@ -91,18 +97,15 @@ function App() {
   const clearChat = () => {
     const confirmClear = window.confirm("Are you sure you want to clear chat view?");
     if (!confirmClear) return;
-    setChatHistory([]); // Only clears local UI, keeps history in Firestore
+    setChatHistory([]);
   };
-  ;
 
   return (
     <div className="min-h-screen font-inter bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-200 dark:from-gray-900 dark:to-gray-800 transition-all duration-500">
       <div className="max-w-3xl mx-auto px-4 py-6 flex flex-col h-screen">
         <div className="flex justify-between items-center mb-4">
           <div className="flex-1 text-center">
-            <h1 className="text-4xl font-bold text-blue-700 dark:text-blue-300">
-              AI ChatBot💬
-            </h1>
+            <h1 className="text-4xl font-bold text-blue-700 dark:text-blue-300">AI ChatBot💬</h1>
           </div>
           <div className="flex gap-2 items-center">
             <button
@@ -155,12 +158,56 @@ function App() {
                 className={`flex ${chat.type === "question" ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-xs md:max-w-sm px-4 py-3 rounded-xl text-sm shadow-md whitespace-pre-wrap break-words relative ${chat.type === "question"
+                  className={`max-w-xs md:max-w-sm px-4 py-3 rounded-xl text-sm shadow-md break-words relative ${chat.type === "question"
                     ? "bg-blue-600 text-white rounded-br-none"
                     : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-100 rounded-bl-none"
                     }`}
                 >
-                  <ReactMarkdown>{chat.content}</ReactMarkdown>
+                  <ReactMarkdown
+                    className="prose dark:prose-invert max-w-full text-sm break-words"
+                    components={{
+                      code({ node, inline, className, children, ...props }) {
+                        const [copied, setCopied] = useState(false);
+
+                        if (inline) {
+                          return (
+                            <code
+                              className="bg-gray-200 dark:bg-gray-700 px-1 py-0.5 rounded font-mono text-xs"
+                              {...props}
+                            >
+                              {children}
+                            </code>
+                          );
+                        }
+
+                        const handleCopy = () => {
+                          navigator.clipboard.writeText(children);
+                          setCopied(true);
+                          setTimeout(() => setCopied(false), 1500);
+                        };
+
+                        return (
+                          <div className="relative group">
+                            <button
+                              onClick={handleCopy}
+                              className="absolute top-2 right-2 text-xs bg-gray-300 hover:bg-gray-400 text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100 px-2 py-0.5 rounded z-10"
+                            >
+                              {copied ? "Copied" : "Copy"}
+                            </button>
+                            <pre className="overflow-x-auto bg-gray-200 dark:bg-gray-800 p-3 rounded text-xs whitespace-pre-wrap">
+                              <code {...props} className="font-mono">
+                                {children}
+                              </code>
+                            </pre>
+                          </div>
+                        );
+                      },
+                    }}
+                  >
+                    {chat.content}
+                  </ReactMarkdown>
+
+
                   <div className="text-[10px] text-right text-gray-400 dark:text-gray-300 mt-1">
                     {chat.timestamp}
                   </div>
