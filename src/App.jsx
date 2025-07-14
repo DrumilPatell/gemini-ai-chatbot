@@ -194,7 +194,7 @@ function App() {
                             >
                               {copied ? "Copied" : "Copy"}
                             </button>
-                            <pre className="overflow-x-auto bg-gray-200 dark:bg-gray-800 p-3 rounded text-xs whitespace-pre-wrap">
+                            <pre className="overflow-x-auto bg-gray-200 dark:bg-gray-800 p-3 pr-14 rounded text-xs whitespace-pre-wrap">
                               <code {...props} className="font-mono">
                                 {children}
                               </code>
