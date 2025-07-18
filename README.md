@@ -41,8 +41,8 @@ A modern, aesthetic chatbot built with React, Tailwind CSS, and Google's Gemini 
 Create a `.env` file in the root directory with the following:
 
 ```env
-VITE_API_GENERATIVE_LANGUAGE_CLIENT=your_openai_or_gemini_api_key
-Replace your_openai_or_gemini_api_key with your actual API key from Google AI Studio.
+VITE_API_GENERATIVE_LANGUAGE_CLIENT=your_gemini_api_key
+Replace your_gemini_api_key with your actual API key from Google AI Studio.
 
 ## 🛠️ Setup Instructions
 
