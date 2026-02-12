@@ -68,7 +68,7 @@ function App() {
 
     try {
       const response = await axios.post(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${import.meta.env.VITE_API_GENERATIVE_LANGUAGE_CLIENT}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${import.meta.env.VITE_API_GENERATIVE_LANGUAGE_CLIENT}`,
         { contents: contextMessages }
       );
 
@@ -82,9 +82,11 @@ function App() {
       setChatHistory((prev) => [...prev, aiReply]);
       await saveMessage(aiReply);
     } catch (error) {
+      console.error("API Error:", error.response?.data || error.message);
+      const errorMessage = error.response?.data?.error?.message || error.message || "Unknown error";
       const errReply = {
         type: "answer",
-        content: "❌ Error generating response.",
+        content: `❌ Error: ${errorMessage}`,
         timestamp: getCurrentTimestamp(),
       };
       setChatHistory((prev) => [...prev, errReply]);
